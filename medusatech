@@ -1,0 +1,356 @@
+-- Load the Orion Library
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+
+-- Get the Lighting service
+local Lighting = game:GetService("Lighting")
+
+-- Variables for ESP
+local ghostESPEnabled = false
+local phantomESPEnabled = false
+local ghostFillColor = Color3.new(0, 0, 0)       -- Default fill color for ghosts (red)
+local ghostOutlineColor = Color3.new(1, 0, 0)    -- Default outline color for ghosts (white)
+local phantomFillColor = Color3.new(0, 0, 0)    -- Default fill color for phantoms (blue)
+local phantomOutlineColor = Color3.new(0, 0, 1) -- Default outline color for phantoms (white)
+local fillTransparency = 0.1  -- Default fill transparency
+local outlineTransparency = 0.1  -- Default outline transparency
+
+-- Variables for Ambient Lighting
+local ambientLightingEnabled = false
+local currentAmbientColor = Color3.fromRGB(255, 127, 127)
+local currentAmbientIntensity = 1.0
+
+-- Function to update ghost ESP
+local function updateGhostESP()
+    for _, player in ipairs(game.Workspace.Players:GetChildren()[1]:GetDescendants()) do
+        if player.ClassName == "Model" then
+            if ghostESPEnabled and not player:FindFirstChild("Highlight") then
+                local h = Instance.new("Highlight", player)
+                h.FillColor = ghostFillColor
+                h.OutlineColor = ghostOutlineColor
+                h.FillTransparency = fillTransparency
+                h.OutlineTransparency = outlineTransparency
+                print(string.format("Highlighted ghost %s", player.Name))
+            elseif not ghostESPEnabled and player:FindFirstChild("Highlight") then
+                player:FindFirstChild("Highlight"):Destroy()
+                print(string.format("Removed highlight from ghost %s", player.Name))
+            elseif player:FindFirstChild("Highlight") then
+                player:FindFirstChild("Highlight").FillColor = ghostFillColor
+                player:FindFirstChild("Highlight").OutlineColor = ghostOutlineColor
+                player:FindFirstChild("Highlight").FillTransparency = fillTransparency
+                player:FindFirstChild("Highlight").OutlineTransparency = outlineTransparency
+            end
+        end
+    end
+end
+
+-- Function to update phantom ESP
+local function updatePhantomESP()
+    for _, player in ipairs(game.Workspace.Players:GetChildren()[2]:GetDescendants()) do
+        if player.ClassName == "Model" then
+            if phantomESPEnabled and not player:FindFirstChild("Highlight") then
+                local h = Instance.new("Highlight", player)
+                h.FillColor = phantomFillColor
+                h.OutlineColor = phantomOutlineColor
+                h.FillTransparency = fillTransparency
+                h.OutlineTransparency = outlineTransparency
+                print(string.format("Highlighted phantom %s", player.Name))
+            elseif not phantomESPEnabled and player:FindFirstChild("Highlight") then
+                player:FindFirstChild("Highlight"):Destroy()
+                print(string.format("Removed highlight from phantom %s", player.Name))
+            elseif player:FindFirstChild("Highlight") then
+                player:FindFirstChild("Highlight").FillColor = phantomFillColor
+                player:FindFirstChild("Highlight").OutlineColor = phantomOutlineColor
+                player:FindFirstChild("Highlight").FillTransparency = fillTransparency
+                player:FindFirstChild("Highlight").OutlineTransparency = outlineTransparency
+            end
+        end
+    end
+end
+
+-- Function to update ambient lighting
+local function updateAmbientLighting()
+    if ambientLightingEnabled then
+        Lighting.Ambient = currentAmbientColor
+        Lighting.AmbientIntensity = currentAmbientIntensity
+    else
+        Lighting.Ambient = Color3.new() -- Reset to default (optional)
+    end
+end
+
+-- Function to change ambient lighting color and intensity
+local function changeAmbientLight(color, intensity)
+    currentAmbientColor = color
+    currentAmbientIntensity = intensity
+    updateAmbientLighting()
+end
+
+-- Function to change materials to Smooth Plastic and save original materials
+local originalMaterials = {}  -- Table to store original materials
+
+local function setSmoothPlastic()
+    originalMaterials = {}
+    for _, part in ipairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            originalMaterials[part] = part.Material
+            part.Material = Enum.Material.SmoothPlastic
+        end
+    end
+end
+
+-- Function to restore original materials
+local function restoreMaterials()
+    for part, material in pairs(originalMaterials) do
+        if part and part:IsA("BasePart") then
+            part.Material = material
+        end
+    end
+    originalMaterials = {}
+end
+
+-- Create the main window with larger dimensions
+local Window = OrionLib:MakeWindow({
+    Name = "medusatech",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "ESPConfigs",
+    Size = UDim2.new(0, 400, 0, 600)  -- Adjust dimensions as needed
+})
+
+-- Create tabs in the GUI
+local GhostTab = Window:MakeTab({Name = "Ghost ESP", Icon = "rbxassetid://6031280882", PremiumOnly = false})
+local PhantomTab = Window:MakeTab({Name = "Phantom ESP", Icon = "rbxassetid://6031280882", PremiumOnly = false})
+local LightingTab = Window:MakeTab({Name = "Map", Icon = "rbxassetid://6031280882", PremiumOnly = false})
+
+-- Add a Credits tab with a toggle
+local CreditsTab = Window:MakeTab({Name = "Credits", Icon = "rbxassetid://6031280882", PremiumOnly = false})
+
+CreditsTab:AddToggle({
+    Name = "Made by @funceyyy and chatgpt",
+    Default = false,
+    Callback = function(state)
+        -- This toggle does nothing as requested
+    end
+})
+
+CreditsTab:AddToggle({
+    Name = "this script is made intirely using chatgpt",
+    Default = false,
+    Callback = function(state)
+        -- This toggle does nothing as requested
+    end
+})
+
+-- Add a Read Me tab with a dropdown
+local ReadMeTab = Window:MakeTab({Name = "Read Me", Icon = "rbxassetid://6031280882", PremiumOnly = false})
+
+ReadMeTab:AddDropdown({
+    Name = "Important Notice",
+    Options = {
+        "Don't configure the cheat while in-game or else your game breaks",
+        "And ambient light is still a lil buggy but works",
+        " "
+    },
+    Default = 1,  -- Default option index
+    Callback = function(index, option)
+        if index == 1 then
+            OrionLib:MessageBox("Important Notice", option)
+        elseif index == 2 then
+            OrionLib:MessageBox("Important Notice", option)
+        end
+        -- Option 3 does nothing as per the request
+    end
+})
+
+-- Add toggles for ESP enabling
+local ghostToggle = GhostTab:AddToggle({
+    Name = "Enable Ghost ESP",
+    Default = false,
+    Callback = function(state)
+        ghostESPEnabled = state
+        updateGhostESP()
+    end
+})
+
+local phantomToggle = PhantomTab:AddToggle({
+    Name = "Enable Phantom ESP",
+    Default = false,
+    Callback = function(state)
+        phantomESPEnabled = state
+        updatePhantomESP()
+    end
+})
+
+-- Add Color Pickers and Sliders for ESP colors and transparency
+GhostTab:AddColorpicker({
+    Name = "Ghost Fill Color",
+    Default = ghostFillColor,
+    Callback = function(value)
+        ghostFillColor = value
+        updateGhostESP()
+    end	  
+})
+
+GhostTab:AddColorpicker({
+    Name = "Ghost Outline Color",
+    Default = ghostOutlineColor,
+    Callback = function(value)
+        ghostOutlineColor = value
+        updateGhostESP()
+    end	  
+})
+
+GhostTab:AddSlider({
+    Name = "Ghost Fill Transparency",
+    Min = 0,
+    Max = 1,
+    Default = fillTransparency,
+    Value = fillTransparency,
+    Increment = 0.1,
+    Callback = function(value)
+        fillTransparency = value
+        updateGhostESP()
+    end
+})
+
+GhostTab:AddSlider({
+    Name = "Ghost Outline Transparency",
+    Min = 0,
+    Max = 1,
+    Default = outlineTransparency,
+    Value = outlineTransparency,
+    Increment = 0.1,
+    Callback = function(value)
+        outlineTransparency = value
+        updateGhostESP()
+    end
+})
+
+PhantomTab:AddColorpicker({
+    Name = "Phantom Fill Color",
+    Default = phantomFillColor,
+    Callback = function(value)
+        phantomFillColor = value
+        updatePhantomESP()
+    end	  
+})
+
+PhantomTab:AddColorpicker({
+    Name = "Phantom Outline Color",
+    Default = phantomOutlineColor,
+    Callback = function(value)
+        phantomOutlineColor = value
+        updatePhantomESP()
+    end	  
+})
+
+PhantomTab:AddSlider({
+    Name = "Phantom Fill Transparency",
+    Min = 0,
+    Max = 1,
+    Default = fillTransparency,
+    Value = fillTransparency,
+    Increment = 0.1,
+    Callback = function(value)
+        fillTransparency = value
+        updatePhantomESP()
+    end
+})
+
+PhantomTab:AddSlider({
+    Name = "Phantom Outline Transparency",
+    Min = 0,
+    Max = 1,
+    Default = outlineTransparency,
+    Value = outlineTransparency,
+    Increment = 0.1,
+    Callback = function(value)
+        outlineTransparency = value
+        updatePhantomESP()
+    end
+})
+
+-- Add Toggle and Sliders for Ambient Lighting
+local ambientLightingToggle = LightingTab:AddToggle({
+    Name = "Enable Ambient Lighting",
+    Default = ambientLightingEnabled,
+    Callback = function(state)
+        ambientLightingEnabled = state
+        updateAmbientLighting()
+    end
+})
+
+local rSlider = LightingTab:AddSlider({
+    Name = "Red (0-255)",
+    Min = 0,
+    Max = 255,
+    Default = currentAmbientColor.R * 255,
+    Value = currentAmbientColor.R * 255,
+    Increment = 1,
+    Callback = function(value)
+        currentAmbientColor = Color3.fromRGB(value, currentAmbientColor.G * 255, currentAmbientColor.B * 255)
+        updateAmbientLighting()
+    end
+})
+
+local gSlider = LightingTab:AddSlider({
+    Name = "Green (0-255)",
+    Min = 0,
+    Max = 255,
+    Default = currentAmbientColor.G * 255,
+    Value = currentAmbientColor.G * 255,
+    Increment = 1,
+    Callback = function(value)
+        currentAmbientColor = Color3.fromRGB(currentAmbientColor.R * 255, value, currentAmbientColor.B * 255)
+        updateAmbientLighting()
+    end
+})
+
+local bSlider = LightingTab:AddSlider({
+    Name = "Blue (0-255)",
+    Min = 0,
+    Max = 255,
+    Default = currentAmbientColor.B * 255,
+    Value = currentAmbientColor.B * 255,
+    Increment = 1,
+    Callback = function(value)
+        currentAmbientColor = Color3.fromRGB(currentAmbientColor.R * 255, currentAmbientColor.G * 255, value)
+        updateAmbientLighting()
+    end
+})
+
+LightingTab:AddSlider({
+    Name = "Ambient Intensity",
+    Min = 0,
+    Max = 1,
+    Default = currentAmbientIntensity,
+    Value = currentAmbientIntensity,
+    Increment = 0.01,
+    Callback = function(value)
+        currentAmbientIntensity = value
+        updateAmbientLighting()
+    end
+})
+
+-- Move Toggle for Material Toggle to LightingTab (Map tab)
+local materialToggle = LightingTab:AddToggle({
+    Name = "Smooth Plastic Toggle - for better visuals",
+    Default = false,
+    Callback = onToggle
+})
+
+-- Initialize the ESP functionality
+print("ESP and Lighting Menu Initialized.")
+
+-- Update ESP and Ambient Lighting continuously
+game:GetService("RunService").RenderStepped:Connect(function()
+    if ghostESPEnabled then
+        updateGhostESP()
+    end
+    if phantomESPEnabled then
+        updatePhantomESP()
+    end
+    updateAmbientLighting()
+end)
+
+-- Load Orion Library UI
+OrionLib:Init()
