@@ -11,8 +11,10 @@ local ghostFillColor = Color3.new(0, 0, 0)       -- Default fill color for ghost
 local ghostOutlineColor = Color3.new(1, 0, 0)    -- Default outline color for ghosts (white)
 local phantomFillColor = Color3.new(0, 0, 0)    -- Default fill color for phantoms (blue)
 local phantomOutlineColor = Color3.new(0, 0, 1) -- Default outline color for phantoms (white)
-local fillTransparency = 0.1  -- Default fill transparency
-local outlineTransparency = 0.1  -- Default outline transparency
+local ghostFillTransparency = 0.1  -- Default fill transparency for ghosts
+local ghostOutlineTransparency = 0.1  -- Default outline transparency for ghosts
+local phantomFillTransparency = 0.1  -- Default fill transparency for phantoms
+local phantomOutlineTransparency = 0.1  -- Default outline transparency for phantoms
 
 -- Variables for Ambient Lighting
 local ambientLightingEnabled = false
@@ -27,8 +29,8 @@ local function updateGhostESP()
                 local h = Instance.new("Highlight", player)
                 h.FillColor = ghostFillColor
                 h.OutlineColor = ghostOutlineColor
-                h.FillTransparency = fillTransparency
-                h.OutlineTransparency = outlineTransparency
+                h.FillTransparency = ghostFillTransparency
+                h.OutlineTransparency = ghostOutlineTransparency
                 print(string.format("Highlighted ghost %s", player.Name))
             elseif not ghostESPEnabled and player:FindFirstChild("Highlight") then
                 player:FindFirstChild("Highlight"):Destroy()
@@ -36,8 +38,8 @@ local function updateGhostESP()
             elseif player:FindFirstChild("Highlight") then
                 player:FindFirstChild("Highlight").FillColor = ghostFillColor
                 player:FindFirstChild("Highlight").OutlineColor = ghostOutlineColor
-                player:FindFirstChild("Highlight").FillTransparency = fillTransparency
-                player:FindFirstChild("Highlight").OutlineTransparency = outlineTransparency
+                player:FindFirstChild("Highlight").FillTransparency = ghostFillTransparency
+                player:FindFirstChild("Highlight").OutlineTransparency = ghostOutlineTransparency
             end
         end
     end
@@ -51,8 +53,8 @@ local function updatePhantomESP()
                 local h = Instance.new("Highlight", player)
                 h.FillColor = phantomFillColor
                 h.OutlineColor = phantomOutlineColor
-                h.FillTransparency = fillTransparency
-                h.OutlineTransparency = outlineTransparency
+                h.FillTransparency = phantomFillTransparency
+                h.OutlineTransparency = phantomOutlineTransparency
                 print(string.format("Highlighted phantom %s", player.Name))
             elseif not phantomESPEnabled and player:FindFirstChild("Highlight") then
                 player:FindFirstChild("Highlight"):Destroy()
@@ -60,8 +62,8 @@ local function updatePhantomESP()
             elseif player:FindFirstChild("Highlight") then
                 player:FindFirstChild("Highlight").FillColor = phantomFillColor
                 player:FindFirstChild("Highlight").OutlineColor = phantomOutlineColor
-                player:FindFirstChild("Highlight").FillTransparency = fillTransparency
-                player:FindFirstChild("Highlight").OutlineTransparency = outlineTransparency
+                player:FindFirstChild("Highlight").FillTransparency = phantomFillTransparency
+                player:FindFirstChild("Highlight").OutlineTransparency = phantomOutlineTransparency
             end
         end
     end
@@ -71,9 +73,12 @@ end
 local function updateAmbientLighting()
     if ambientLightingEnabled then
         Lighting.Ambient = currentAmbientColor
-        Lighting.AmbientIntensity = currentAmbientIntensity
+        Lighting.OutdoorAmbient = currentAmbientColor
+        Lighting.Brightness = currentAmbientIntensity * 2 -- Adjusted for intensity
     else
-        Lighting.Ambient = Color3.new() -- Reset to default (optional)
+        Lighting.Ambient = Color3.new(0, 0, 0) -- Reset to default (optional)
+        Lighting.OutdoorAmbient = Color3.new(0, 0, 0) -- Reset to default (optional)
+        Lighting.Brightness = 2 -- Default brightness
     end
 end
 
@@ -148,7 +153,9 @@ ReadMeTab:AddDropdown({
     Options = {
         "Don't configure the cheat while in-game or else your game breaks",
         "And ambient light is still a lil buggy but works",
-        " "
+        "the team you are on put their transparency to 1 so it makes them",
+        "invissble, because you cant toggle them off after someime",
+        " ",
     },
     Default = 1,  -- Default option index
     Callback = function(index, option)
@@ -203,11 +210,11 @@ GhostTab:AddSlider({
     Name = "Ghost Fill Transparency",
     Min = 0,
     Max = 1,
-    Default = fillTransparency,
-    Value = fillTransparency,
+    Default = ghostFillTransparency,
+    Value = ghostFillTransparency,
     Increment = 0.1,
     Callback = function(value)
-        fillTransparency = value
+        ghostFillTransparency = value
         updateGhostESP()
     end
 })
@@ -216,11 +223,11 @@ GhostTab:AddSlider({
     Name = "Ghost Outline Transparency",
     Min = 0,
     Max = 1,
-    Default = outlineTransparency,
-    Value = outlineTransparency,
+    Default = ghostOutlineTransparency,
+    Value = ghostOutlineTransparency,
     Increment = 0.1,
     Callback = function(value)
-        outlineTransparency = value
+        ghostOutlineTransparency = value
         updateGhostESP()
     end
 })
@@ -247,11 +254,11 @@ PhantomTab:AddSlider({
     Name = "Phantom Fill Transparency",
     Min = 0,
     Max = 1,
-    Default = fillTransparency,
-    Value = fillTransparency,
+    Default = phantomFillTransparency,
+    Value = phantomFillTransparency,
     Increment = 0.1,
     Callback = function(value)
-        fillTransparency = value
+        phantomFillTransparency = value
         updatePhantomESP()
     end
 })
@@ -260,11 +267,11 @@ PhantomTab:AddSlider({
     Name = "Phantom Outline Transparency",
     Min = 0,
     Max = 1,
-    Default = outlineTransparency,
-    Value = outlineTransparency,
+    Default = phantomOutlineTransparency,
+    Value = phantomOutlineTransparency,
     Increment = 0.1,
     Callback = function(value)
-        outlineTransparency = value
+        phantomOutlineTransparency = value
         updatePhantomESP()
     end
 })
