@@ -155,6 +155,7 @@ ReadMeTab:AddDropdown({
         "And ambient light is still a lil buggy but works",
         "the team you are on put their transparency to 1 so it makes them",
         "invissble, because you cant toggle them off after someime",
+        "toggle anything on you need before changing the sliders or else it break ",
         " ",
     },
     Default = 1,  -- Default option index
